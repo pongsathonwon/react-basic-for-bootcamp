@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { TIMER_STATE } from "../libs";
+import { TIMER_LABEL, TIMER_STATE } from "../libs";
 
 const useAudio = () => {
   const url = "sound.mp3";
@@ -25,15 +25,25 @@ export default function usePorodomo() {
   const [count, setCount] = useState(1 * 60);
   const [snooze, setSnooze] = useState(TIMER_STATE.breakSession); // next session state
 
-  const increment = (getter, setter) => {
-    const cur = getter + 1;
-    setter(cur);
-    setCount(cur * 60);
+  const increment = (timerLabel) => {
+    if (timerLabel === TIMER_LABEL.workSession) {
+      const cur = timer + 1;
+      setTimer(cur);
+      setCount(cur * 60);
+      return;
+    }
+    const curB = timerB + 1;
+    setTimerB(curB);
   };
-  const decrement = (getter, setter) => {
-    const cur = getter === 0 ? 0 : getter - 1;
-    setter(cur);
-    setCount(cur * 60);
+  const decrement = (timerLabel) => {
+    if (timerLabel === TIMER_LABEL.workSession) {
+      const cur = timer === 0 ? 0 : timer - 1;
+      setTimer(cur);
+      setCount(cur);
+      return;
+    }
+    const curB = timerB === 0 ? 0 : timerB - 1;
+    setTimerB(curB);
   };
   const lowerSessionDisable =
     session === TIMER_STATE.breakSession || session === TIMER_STATE.workSession;
@@ -42,14 +52,21 @@ export default function usePorodomo() {
     setSession(TIMER_STATE.snooze);
     play();
   };
-  const isNextSessionWork = () => snooze === TIMER_STATE.workSession;
+  const isNextSessionWork = () => {
+    console.log(snooze);
+    return snooze === TIMER_STATE.workSession;
+  };
   const snoozeTo = () => {
     pause();
     if (snooze === TIMER_STATE.breakSession) {
       setSession(TIMER_STATE.workSession);
+      setSnooze(TIMER_STATE.workSession);
       return;
+    } else if (snooze === TIMER_STATE.workSession) {
+      setSession(TIMER_STATE.breakSession);
+      setSnooze(TIMER_STATE.breakSession);
     }
-    setSnooze(TIMER_STATE.breakSession);
+    return;
   };
 
   const timerHandler = (timerRef) => {
@@ -61,7 +78,7 @@ export default function usePorodomo() {
     // pass if no toggle start
     if (!lowerSessionDisable) return;
     //counter down
-    if (count < 0) {
+    if (count <= 0) {
       if (session === TIMER_STATE.stop) return;
       if (session === TIMER_STATE.breakSession) {
         timerHandler(timer);
@@ -76,7 +93,7 @@ export default function usePorodomo() {
     const id = setInterval(() => {
       //decrement time
       setCount((prev) => prev - 1);
-    }, 10);
+    }, 50);
     return () => clearInterval(id);
   }, [session, count]);
 
@@ -90,10 +107,9 @@ export default function usePorodomo() {
     decrement,
     isNextSessionWork,
     timer,
-    setTimer,
     timerB,
-    setTimerB,
     minusDisable,
     snoozeTo,
+    setSnooze,
   };
 }

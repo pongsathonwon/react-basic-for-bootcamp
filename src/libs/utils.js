@@ -13,3 +13,8 @@ export const TIMER_STATE = {
   breakSession: "BREAK",
   snooze: "SNOOZE",
 };
+
+export const TIMER_LABEL = {
+  workSession: "SESSION",
+  breakSession: "BREAK",
+};
