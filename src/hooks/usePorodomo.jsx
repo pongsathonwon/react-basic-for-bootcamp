@@ -93,7 +93,7 @@ export default function usePorodomo() {
     const id = setInterval(() => {
       //decrement time
       setCount((prev) => prev - 1);
-    }, 50);
+    }, 1000);
     return () => clearInterval(id);
   }, [session, count]);
 
